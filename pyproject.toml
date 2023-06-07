@@ -1,0 +1,26 @@
+[tool.pdm]
+
+[project]
+name = "matching_app"
+version = "0.3.0"
+description = "matching dashboard"
+authors = [{ name = "Jeremy Fraoua", email = "jeremy.fraoua@bnpparibas.com" }]
+dependencies = [
+    "streamlit>=1.21.0",
+    "polars>=0.17.9",
+    "rapidfuzz>=3.0.0",
+    "stqdm>=0.0.5",
+    "Xlsxwriter>=3.1.0",
+    "pandas>=1.5.3",
+    "xlsx2csv>=0.8.1",
+]
+requires-python = ">=3.10"
+readme = "README.md"
+license = { text = "MIT" }
+
+[build-system]
+requires = ["pdm-pep517>=1.0"]
+build-backend = "pdm.pep517.api"
+
+[tool.pdm.scripts]
+dashboard = "streamlit run src/page_streamlit.py"
