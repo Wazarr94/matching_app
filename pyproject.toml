@@ -1,26 +1,22 @@
-[tool.pdm]
-
-[project]
-name = "matching_app"
-version = "0.3.0"
-description = "matching dashboard"
-authors = [{ name = "Jeremy Fraoua", email = "jeremy.fraoua@bnpparibas.com" }]
-dependencies = [
-    "streamlit>=1.21.0",
-    "polars>=0.17.9",
-    "rapidfuzz>=3.0.0",
-    "stqdm>=0.0.5",
-    "Xlsxwriter>=3.1.0",
-    "pandas>=1.5.3",
-    "xlsx2csv>=0.8.1",
-]
-requires-python = ">=3.10"
+[tool.poetry]
+name = "matching-app"
+version = "0.1.0"
+description = ""
+authors = ["jeremy.fraoua <jeremy.fraoua@qonto.com>"]
 readme = "README.md"
-license = { text = "MIT" }
+packages = [{include = "matching_app"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+streamlit = "^1.24.0"
+polars = "^0.18.4"
+rapidfuzz = "^3.1.1"
+stqdm = "^0.0.5"
+xlsxwriter = "^3.1.2"
+pandas = "^2.0.3"
+xlsx2csv = "^0.8.1"
+
 
 [build-system]
-requires = ["pdm-pep517>=1.0"]
-build-backend = "pdm.pep517.api"
-
-[tool.pdm.scripts]
-dashboard = "streamlit run src/page_streamlit.py"
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

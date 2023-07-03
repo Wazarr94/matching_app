@@ -73,8 +73,6 @@ def match_df(
     info_known: DataMatch,
     distance_scorer: DistanceScorer,
     limit: int,
-    col_match_map: str | None,
-    col_known_map: str | None,
 ):
     df_match, col_match, col_match_id = info_match
     df_known, col_known, col_known_id = info_known
@@ -94,8 +92,8 @@ def match_df(
 
     with st.spinner("Cleaning strings of known database"):
         col_known_join = [
-            col_known_id,
             col_known,
+            col_known_id,
             pl.col(col_known).apply(clean_string).alias(f"{col_known}_clean"),
         ]
         columns_join_known = [val for val in col_known_join if val is not None]

@@ -4,6 +4,11 @@ import streamlit as st
 from io_operations import SUPPORTED_TYPES, export_xlsx, upload_file_fn
 from matching import DataMatch, get_distance, match_df
 
+st.set_page_config(
+    page_title="Matching app",
+    page_icon="🧩",
+)
+
 
 @dataclass
 class InfoTab:
