@@ -6,36 +6,31 @@ To run this, you need Python 3.10.
 
 ## Installation
 
-Clone the repository:
+Clone the repository and open the repository on your terminal or IDE.
+
+### Install with poetry
 
 ```bash
-git clone https://gitlab-dogen.group.echonet/gf/csr/methodology_data/c2a/matching_app
-```
-
-Then, open the repository on your terminal or IDE.
-
-### Install with pdm
-
-I recommend using pdm for all python projects. This is very useful in order to share a project and make sure we have the correct dependencies.
-
-You will find instructions in the [README_PDM.md file](README_PDM.md) in order to install this tool.
-
-```bash
-pdm install
+poetry install
 ```
 
 ### Install with pip
 
+Use a virtual environment and install the dependencies with pip.
+
 ```bash
+python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
 ## Running the dashboard
 
-### Running with pdm
+### Running with poetry
 
 ```bash
-pdm run dashboard
+poetry shell
+streamlit run src/page_streamlit.py
 ```
 
 ### Running with pip

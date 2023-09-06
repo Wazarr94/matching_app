@@ -73,7 +73,7 @@ def match_df(
     info_known: DataMatch,
     distance_scorer: DistanceScorer,
     limit: int,
-):
+) -> pl.DataFrame:
     df_match, col_match, col_match_id = info_match
     df_known, col_known, col_known_id = info_known
 

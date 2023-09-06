@@ -83,20 +83,6 @@ def get_matching_options():
     return distance_fn, limit
 
 
-def get_mapping_options(info_match: DataMatch, info_known: DataMatch):
-    st.write("### Mapping options")
-
-    col1, col2 = st.columns(2)
-
-    opt_match = [None] + st.session_state["match_columns"]
-    col_map_match = col1.selectbox("Mapping column for match dataset", opt_match)
-
-    opt_known = [None] + st.session_state["known_columns"]
-    col_map_known = col2.selectbox("Mapping column for known dataset", opt_known)
-
-    return col_map_match, col_map_known
-
-
 def validate_mapping(
     info_match: DataMatch,
     col_map_match: str | None,
@@ -129,22 +115,11 @@ def get_matching_results(
         return
 
     distance_fn, limit = get_matching_options()
-    col_match_map, col_known_map = get_mapping_options(info_match, info_known)
-    enabled_bool = validate_mapping(
-        info_match, col_match_map, info_known, col_known_map
-    )
 
-    match_btn = st.button("Match", disabled=(not enabled_bool))
+    match_btn = st.button("Match")
     if match_btn:
         assert limit is not None and info_match is not None and info_known is not None
-        st.session_state.matches = match_df(
-            info_match,
-            info_known,
-            distance_fn,
-            limit,
-            col_match_map,
-            col_known_map,
-        )
+        st.session_state.matches = match_df(info_match, info_known, distance_fn, limit)
 
     display_matching_results()
 
