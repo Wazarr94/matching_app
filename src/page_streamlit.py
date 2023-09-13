@@ -40,7 +40,7 @@ def read_database(data_tab: DataTab) -> DataMatch | None:
     if var in st.session_state and st.session_state[var].height > 0:
         st.write("#### Data preview")
         height_df = st.session_state[var].height
-        st.write(st.session_state[var].sample(max(5, height_df)).to_pandas())
+        st.write(st.session_state[var].sample(min(5, height_df)).to_pandas())
 
     if var_columns not in st.session_state:
         return None

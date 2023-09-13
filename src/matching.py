@@ -156,17 +156,23 @@ def match_df(
         .join(
             names_match, left_on=f"{col_match}_clean_1", right_on=f"{col_match}_clean"
         )
-        .join(
-            names_known, left_on=f"{col_known}_clean_2", right_on=f"{col_known}_clean"
-        )
-        .with_columns(score=pl.col("score_initial"), rank=pl.col("rank_initial"))
-        .drop(
-            f"{col_match}_clean_1",
-            f"{col_known}_clean_2",
-            "score_initial",
-            "rank_initial",
-        )
-        .sort(by=[pl.col(col_match), "rank"])
     )
+
+    if col_known_map is not None and col_match_map is not None:
+        matches = (
+            matches.join(
+                names_known,
+                left_on=[f"{col_known}_clean_2", col_match_map],
+                right_on=[f"{col_known}_clean", col_known_map],
+            )
+            .with_columns(score=pl.col("score_initial"), rank=pl.col("rank_initial"))
+            .drop(
+                f"{col_match}_clean_1",
+                f"{col_known}_clean_2",
+                "score_initial",
+                "rank_initial",
+            )
+            .sort(by=[pl.col(col_match), "rank"])
+        )
 
     return matches
