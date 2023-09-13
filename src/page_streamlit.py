@@ -48,11 +48,14 @@ def read_database(data_tab: DataTab) -> DataMatch | None:
     col1, col2 = st.columns(2)
 
     column_select = col1.selectbox(
-        "Column used for matching", st.session_state[var_columns_str]
+        "Column used for matching",
+        st.session_state[var_columns_str],
+        key=f"select_{var}",
     )
     column_id = col2.selectbox(
         "Column id to be added for matching",
         [None] + st.session_state[var_columns],
+        key=f"select_id_{var}",
     )
 
     confirm_col = st.button("Confirm selection", key=f"confirm_{var}")
@@ -82,6 +85,24 @@ def get_matching_options():
     )
 
     return distance_fn, limit
+
+
+def get_mapping_options():
+    st.write("### Mapping options")
+
+    col1, col2 = st.columns(2)
+
+    opt_match = [None] + st.session_state["match_columns"]
+    col_map_match: str | None = col1.selectbox(
+        "Mapping column for match dataset", opt_match
+    )
+
+    opt_known = [None] + st.session_state["known_columns"]
+    col_map_known: str | None = col2.selectbox(
+        "Mapping column for known dataset", opt_known
+    )
+
+    return col_map_match, col_map_known
 
 
 def validate_mapping(
@@ -116,11 +137,22 @@ def get_matching_results(
         return
 
     distance_fn, limit = get_matching_options()
+    col_match_map, col_known_map = get_mapping_options()
+    enabled_bool = validate_mapping(
+        info_match, col_match_map, info_known, col_known_map
+    )
 
-    match_btn = st.button("Match")
+    match_btn = st.button("Match", disabled=(not enabled_bool))
     if match_btn:
         assert limit is not None and info_match is not None and info_known is not None
-        st.session_state.matches = match_df(info_match, info_known, distance_fn, limit)
+        st.session_state.matches = match_df(
+            info_match,
+            info_known,
+            distance_fn,
+            col_match_map,
+            col_known_map,
+            limit,
+        )
 
     display_matching_results()
 

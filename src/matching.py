@@ -72,6 +72,8 @@ def match_df(
     info_match: DataMatch,
     info_known: DataMatch,
     distance_scorer: DistanceScorer,
+    col_match_map: str | None,
+    col_known_map: str | None,
     limit: int,
 ) -> pl.DataFrame:
     df_match, col_match, col_match_id = info_match
@@ -81,36 +83,46 @@ def match_df(
         col_match_join = [
             col_match_id,
             col_match,
+            col_match_map,
             pl.col(col_match).apply(clean_string).alias(f"{col_match}_clean"),
         ]
         columns_join_match = [val for val in col_match_join if val is not None]
-        names_match_join = df_match.select(columns_join_match).unique()
-
-    names_match_input: list[str] = (
-        names_match_join.select(pl.col(f"{col_match}_clean")).to_series().to_list()
-    )
+        names_match = df_match.select(columns_join_match).unique()
 
     with st.spinner("Cleaning strings of known database"):
         col_known_join = [
             col_known,
             col_known_id,
+            col_known_map,
             pl.col(col_known).apply(clean_string).alias(f"{col_known}_clean"),
         ]
         columns_join_known = [val for val in col_known_join if val is not None]
-        names_known_join = df_known.select(columns_join_known).unique()
+        names_known = df_known.select(columns_join_known).unique()
 
-    names_known_input: list[str] = (
-        names_known_join.select(pl.col(f"{col_known}_clean")).to_series().to_list()
-    )
+    # names_known_input: list[str] = (
+    #     names_known_join.select(pl.col(f"{col_known}_clean")).to_series().to_list()
+    # )
 
     matches_dict = dict()
 
     with st.spinner("Matching"):
-        for name_match in stqdm(names_match_input):
+        for row_match in stqdm(names_match.iter_rows(named=True)):
+            name_match = row_match[f"{col_match}_clean"]
+            names_known_cp = names_known
+
+            if col_match_map is not None and col_known_map is not None:
+                names_known_cp = names_known.filter(
+                    pl.col(col_known_map) == row_match[col_match_map]
+                )
+
+            names_known_final = names_known_cp.get_column(
+                f"{col_known}_clean"
+            ).to_list()
+
             matches_dict[name_match] = list(
                 process.extract(
                     name_match,
-                    names_known_input,
+                    names_known_final,
                     scorer=distance_scorer,
                     limit=limit,
                 )
@@ -126,21 +138,35 @@ def match_df(
         matches_scores.append([v[1] for v in value])
         matches_rank.append(list(range(1, limit + 1)))
 
-    col_matches = columns_join_match + columns_join_known + ["score", "rank"]
+    # col_matches = columns_join_match + columns_join_known + ["score", "rank"]
+    # if col_known == col_match:
+    #     # Remove duplicate columns
+    #     col_matches = [col for col in col_matches if col != col_known]
+
     matches = (
         pl.DataFrame(
             {
-                f"{col_match}_clean": matches_keys,
-                f"{col_known}_clean": matches_names,
-                "score": matches_scores,
-                "rank": matches_rank,
+                f"{col_match}_clean_1": matches_keys,
+                f"{col_known}_clean_2": matches_names,
+                "score_initial": matches_scores,
+                "rank_initial": matches_rank,
             }
         )
-        .explode(f"{col_known}_clean", "score", "rank")
-        .join(names_match_join, on=f"{col_match}_clean")
-        .join(names_known_join, on=f"{col_known}_clean")
-        .select(col_matches)
-        .drop([f"{col_match}_clean", f"{col_known}_clean"])
+        .explode(f"{col_known}_clean_2", "score_initial", "rank_initial")
+        .join(
+            names_match, left_on=f"{col_match}_clean_1", right_on=f"{col_match}_clean"
+        )
+        .join(
+            names_known, left_on=f"{col_known}_clean_2", right_on=f"{col_known}_clean"
+        )
+        .with_columns(score=pl.col("score_initial"), rank=pl.col("rank_initial"))
+        .drop(
+            f"{col_match}_clean_1",
+            f"{col_known}_clean_2",
+            "score_initial",
+            "rank_initial",
+        )
         .sort(by=[pl.col(col_match), "rank"])
     )
+
     return matches
