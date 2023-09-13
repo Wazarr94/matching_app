@@ -7,6 +7,10 @@ def lower_string(s: str):
     return s.lower()
 
 
+def strip_string(s: str):
+    return s.strip()
+
+
 def keep_separators(s: str):
     separators_list = ["-", "'"]
     sep_str = "".join(separators_list)
@@ -41,6 +45,7 @@ def translate_characters(s: str):
 
 def clean_string(s: str) -> str:
     s = lower_string(s)
+    s = strip_string(s)
     s = keep_separators(s)
     s = translate_characters(s)
     s = remove_punct_control_spaces(s)
